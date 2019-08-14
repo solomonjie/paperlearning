@@ -14,3 +14,19 @@ contain collection of spresent and sdlete. traversal the delta china, if operati
 2. when do action, get global epoch, set this action epoch
 3. when thread complete all action, thread get global epoch and set it to local epoch
 4. trigger gc. gc thread will get the mini epoch from all thread local epoch, and then compare with it action epoch, reclaim all memory for action epoch which less than min epoch.
+### Fast Consolidation
+go through the china, use spresent and sdelete collection. sort it by offset and key. initial range is [0, n)
+1. for insert,  break segment into [0, offset) and [offset， n)
+2. for delete, break segment into [0, offset) and [offset+1, n)
+3. for delete item which not exist in base node, ignore.
+first go through insert, and the delete collection.
+### Node Search Shortcuts
+use offset and key information in china node. current search range is (min, max)
+1. if search key larger than china node key
+   a. offset less than min, search range is (min, max)
+   b. offset larger than min, less than max, search range is (offset, max)
+   c. offset larger than max, return directly
+2. if search key less than china node key
+   a. offset less than min, return directly
+   b. offset larger than min and less than max, search range is (min, offset)
+   c. offset larger than max, search range is (min, max)
